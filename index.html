@@ -336,6 +336,7 @@
     </div>
 
     <div class="footer">Developed by Sadrita Neogi</div>
+    <audio id="win-sound" src="fahhh_KcgAXfs.mp3" preload="auto"></audio>
 
     <script>
       document.addEventListener("DOMContentLoaded", () => {
@@ -347,6 +348,7 @@
         const winModal = document.getElementById("win-modal");
         const winText = document.getElementById("win-text");
         const winMessage = document.getElementById("win-message");
+        const winSound = document.getElementById("win-sound");
         const restartBtn = document.getElementById("restart-btn");
         const playAgainBtn = document.getElementById("play-again-btn");
         const closeModalBtn = document.getElementById("close-modal-btn");
@@ -505,28 +507,23 @@
         }
 
         function playWinSound() {
+          if (!winSound) {
+            return;
+          }
+
           try {
-            const AudioContext =
-              window.AudioContext || window.webkitAudioContext;
-            const audioCtx = new AudioContext();
-            const oscillator = audioCtx.createOscillator();
-            const gainNode = audioCtx.createGain();
+            winSound.pause();
+            winSound.currentTime = 0;
+            winSound.volume = 1;
 
-            oscillator.type = "triangle";
-            oscillator.frequency.setValueAtTime(523.25, audioCtx.currentTime); // C5
-            gainNode.gain.setValueAtTime(1, audioCtx.currentTime);
-
-            oscillator.connect(gainNode);
-            gainNode.connect(audioCtx.destination);
-
-            oscillator.start();
-            oscillator.stop(audioCtx.currentTime + 0.35);
-
-            oscillator.onended = () => {
-              audioCtx.close();
-            };
+            const playPromise = winSound.play();
+            if (playPromise !== undefined) {
+              playPromise.catch((err) => {
+                console.warn("Win sound play failed:", err);
+              });
+            }
           } catch (err) {
-            console.warn("Win sound failed:", err);
+            console.warn("Win sound error:", err);
           }
         }
 
