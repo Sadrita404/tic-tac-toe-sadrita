@@ -337,6 +337,10 @@
 
     <div class="footer">Developed by Sadrita Neogi</div>
     <audio id="win-sound" src="fahhh_KcgAXfs.mp3" preload="auto"></audio>
+    <audio
+      id="click-sound"
+      src="universfield-computer-mouse-click-352734.mp3"
+      preload="auto"></audio>
 
     <script>
       document.addEventListener("DOMContentLoaded", () => {
@@ -359,6 +363,7 @@
         const modeMultiplayerBtn = document.getElementById("mode-multiplayer");
         const modeSingleplayerBtn =
           document.getElementById("mode-singleplayer");
+        const clickSound = document.getElementById("click-sound");
 
         const X_CLASS = "x";
         const O_CLASS = "o";
@@ -420,6 +425,7 @@
           });
 
           winModal.style.display = "none";
+          playStartSound();
         }
 
         function handleClick(e) {
@@ -506,25 +512,33 @@
           });
         }
 
-        function playWinSound() {
-          if (!winSound) {
+        function playAudio(soundElement) {
+          if (!soundElement) {
             return;
           }
 
           try {
-            winSound.pause();
-            winSound.currentTime = 0;
-            winSound.volume = 1;
+            soundElement.pause();
+            soundElement.currentTime = 0;
+            soundElement.volume = 1;
 
-            const playPromise = winSound.play();
+            const playPromise = soundElement.play();
             if (playPromise !== undefined) {
               playPromise.catch((err) => {
-                console.warn("Win sound play failed:", err);
+                console.warn("Sound play failed:", err);
               });
             }
           } catch (err) {
-            console.warn("Win sound error:", err);
+            console.warn("Sound error:", err);
           }
+        }
+
+        function playWinSound() {
+          playAudio(winSound);
+        }
+
+        function playStartSound() {
+          playAudio(clickSound);
         }
 
         function endGame(draw) {
