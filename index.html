@@ -38,6 +38,7 @@
         background: #ffe2d8;
         border-radius: 12px;
         box-shadow: 0 10px 20px rgba(167, 86, 122, 0.18);
+        z-index: 1;
       }
 
       .cell:hover {
@@ -49,8 +50,8 @@
         position: absolute;
         content: "";
         background-color: var(--x-color);
-        width: 15px;
-        height: 90px;
+        width: 12px;
+        height: 70px;
         border-radius: 10px;
       }
 
@@ -58,20 +59,44 @@
       .cell.x::after { transform: rotate(-45deg); }
 
       .cell.o::before {
-        width: 60px;
-        height: 60px;
+        width: 50px;
+        height: 50px;
         border-radius: 50%;
-        border: 15px solid var(--o-color);
+        border: 12px solid var(--o-color);
         background-color: transparent;
+      }
+
+      .board-container {
+        position: relative;
+        width: 320px;
+        height: 320px;
+        margin: 20px auto;
       }
 
       .board {
         display: grid;
         grid-template-columns: repeat(3, 1fr);
         grid-gap: 15px;
-        width: 300px;
-        height: 300px;
-        margin: 20px auto;
+        width: 100%;
+        height: 100%;
+      }
+
+      /* Winning Line SVG */
+      #winning-line-svg {
+        position: absolute;
+        top: 0;
+        left: 0;
+        width: 100%;
+        height: 100%;
+        pointer-events: none;
+        z-index: 10;
+        display: none;
+      }
+
+      #winning-line {
+        stroke-linecap: round;
+        stroke-width: 10;
+        transition: stroke-dashoffset 0.5s ease-out;
       }
 
       .confetti {
@@ -94,7 +119,7 @@
         position: fixed;
         top: 0; left: 0;
         width: 100%; height: 100%;
-        background-color: rgba(59, 24, 57, 0.7);
+        background-color: rgba(59, 24, 57, 0.5);
         z-index: 100;
         justify-content: center;
         align-items: center;
@@ -139,15 +164,10 @@
       .btn-primary { background-color: var(--primary); }
       .btn-primary:hover { background-color: #ff4a97; transform: translateY(-2px); }
       
-      .btn-sm {
-        padding: 6px 15px;
-        font-size: 12px;
-        background-color: #5f3d52;
-      }
+      .btn-sm { padding: 6px 15px; font-size: 12px; background-color: #5f3d52; }
 
       .btn-selected {
         background-color: #3b1f3d !important;
-        box-shadow: inset 0 2px 4px rgba(0,0,0,0.3);
         border: 2px solid var(--primary);
       }
 
@@ -185,7 +205,6 @@
       .option-label {
         font-size: 12px;
         text-transform: uppercase;
-        letter-spacing: 1px;
         font-weight: bold;
         color: var(--dark);
         margin-bottom: 5px;
@@ -229,16 +248,21 @@
 
     <div class="player-turn player-x" id="turn-indicator">Player X's Turn</div>
 
-    <div class="board" id="board">
-      <div class="cell" data-cell-index="0" data-cell></div>
-      <div class="cell" data-cell-index="1" data-cell></div>
-      <div class="cell" data-cell-index="2" data-cell></div>
-      <div class="cell" data-cell-index="3" data-cell></div>
-      <div class="cell" data-cell-index="4" data-cell></div>
-      <div class="cell" data-cell-index="5" data-cell></div>
-      <div class="cell" data-cell-index="6" data-cell></div>
-      <div class="cell" data-cell-index="7" data-cell></div>
-      <div class="cell" data-cell-index="8" data-cell></div>
+    <div class="board-container">
+      <svg id="winning-line-svg">
+        <line id="winning-line" x1="0" y1="0" x2="0" y2="0" stroke="white" />
+      </svg>
+      <div class="board" id="board">
+        <div class="cell" data-cell-index="0" data-cell></div>
+        <div class="cell" data-cell-index="1" data-cell></div>
+        <div class="cell" data-cell-index="2" data-cell></div>
+        <div class="cell" data-cell-index="3" data-cell></div>
+        <div class="cell" data-cell-index="4" data-cell></div>
+        <div class="cell" data-cell-index="5" data-cell></div>
+        <div class="cell" data-cell-index="6" data-cell></div>
+        <div class="cell" data-cell-index="7" data-cell></div>
+        <div class="cell" data-cell-index="8" data-cell></div>
+      </div>
     </div>
 
     <div class="flex justify-center mt-4">
@@ -263,6 +287,7 @@
         createStars();
 
         const cells = document.querySelectorAll("[data-cell]");
+        const boardElement = document.getElementById("board");
         const winModal = document.getElementById("win-modal");
         const winText = document.getElementById("win-text");
         const winMessage = document.getElementById("win-message");
@@ -270,6 +295,9 @@
         const clickSound = document.getElementById("click-sound");
         const turnIndicator = document.getElementById("turn-indicator");
         
+        const lineSvg = document.getElementById("winning-line-svg");
+        const strikeLine = document.getElementById("winning-line");
+
         const modeMultiplayerBtn = document.getElementById("mode-multiplayer");
         const modeSingleplayerBtn = document.getElementById("mode-singleplayer");
         const startXBtn = document.getElementById("start-x");
@@ -278,89 +306,99 @@
         const X_CLASS = "x";
         const O_CLASS = "o";
         const WINNING_COMBINATIONS = [
-          [0, 1, 2], [3, 4, 5], [6, 7, 8],
-          [0, 3, 6], [1, 4, 7], [2, 5, 8],
-          [0, 4, 8], [2, 4, 6],
+          [0, 1, 2], [3, 4, 5], [6, 7, 8], // Rows
+          [0, 3, 6], [1, 4, 7], [2, 5, 8], // Cols
+          [0, 4, 8], [2, 4, 6],            // Diagonals
         ];
 
         let oTurn;
         let singlePlayerMode = false;
-        let startingPlayer = "X"; // Default starting player
+        let startingPlayer = "X";
         let scores = { x: 0, o: 0, tie: 0 };
+        let isGameOver = false;
 
         startGame();
 
-        // Mode and Starting Option Listeners
-        modeMultiplayerBtn.addEventListener("click", () => {
-          singlePlayerMode = false;
-          toggleActive(modeMultiplayerBtn, modeSingleplayerBtn);
-          startGame();
-        });
+        modeMultiplayerBtn.addEventListener("click", () => { singlePlayerMode = false; toggleActive(modeMultiplayerBtn, modeSingleplayerBtn); startGame(); });
+        modeSingleplayerBtn.addEventListener("click", () => { singlePlayerMode = true; toggleActive(modeSingleplayerBtn, modeMultiplayerBtn); startGame(); });
+        startXBtn.addEventListener("click", () => { startingPlayer = "X"; toggleActive(startXBtn, startOBtn); startGame(); });
+        startOBtn.addEventListener("click", () => { startingPlayer = "O"; toggleActive(startOBtn, startXBtn); startGame(); });
 
-        modeSingleplayerBtn.addEventListener("click", () => {
-          singlePlayerMode = true;
-          toggleActive(modeSingleplayerBtn, modeMultiplayerBtn);
-          startGame();
-        });
-
-        startXBtn.addEventListener("click", () => {
-          startingPlayer = "X";
-          toggleActive(startXBtn, startOBtn);
-          startGame();
-        });
-
-        startOBtn.addEventListener("click", () => {
-          startingPlayer = "O";
-          toggleActive(startOBtn, startXBtn);
-          startGame();
-        });
-
-        function toggleActive(active, inactive) {
-          active.classList.add("btn-selected");
-          inactive.classList.remove("btn-selected");
-        }
+        function toggleActive(active, inactive) { active.classList.add("btn-selected"); inactive.classList.remove("btn-selected"); }
 
         function startGame() {
-          // Initialize turn based on selection
+          isGameOver = false;
           oTurn = (startingPlayer === "O");
-          
           updateTurnIndicator();
+          lineSvg.style.display = "none";
           cells.forEach((cell) => {
             cell.classList.remove(X_CLASS, O_CLASS);
             cell.removeEventListener("click", handleClick);
             cell.addEventListener("click", handleClick, { once: true });
           });
           winModal.style.display = "none";
-          playAudio(clickSound);
-
-          // If single player and computer starts (O)
-          if (singlePlayerMode && oTurn) {
-            setTimeout(computerMove, 600);
-          }
+          if (singlePlayerMode && oTurn) setTimeout(computerMove, 600);
         }
 
         function handleClick(e) {
+          if (isGameOver) return;
           const cell = e.target;
           const currentClass = oTurn ? O_CLASS : X_CLASS;
           placeMark(cell, currentClass);
 
-          if (checkWin(currentClass)) {
+          const winningCombo = getWinningCombination(currentClass);
+          if (winningCombo) {
+            drawStrikeLine(winningCombo);
             endGame(false);
           } else if (isDraw()) {
             endGame(true);
           } else {
             swapTurns();
             updateTurnIndicator();
-            if (singlePlayerMode && oTurn) {
-              setTimeout(computerMove, 400);
-            }
+            if (singlePlayerMode && oTurn) setTimeout(computerMove, 600);
           }
         }
 
-        function computerMove() {
-          const availableCells = [...cells].filter(cell => 
-            !cell.classList.contains(X_CLASS) && !cell.classList.contains(O_CLASS)
+        function getWinningCombination(currentClass) {
+          return WINNING_COMBINATIONS.find(comb => 
+            comb.every(index => cells[index].classList.contains(currentClass))
           );
+        }
+
+        function drawStrikeLine(combo) {
+          const firstCell = cells[combo[0]].getBoundingClientRect();
+          const lastCell = cells[combo[2]].getBoundingClientRect();
+          const boardRect = boardElement.getBoundingClientRect();
+
+          // Calculate center points relative to the board
+          const x1 = (firstCell.left + firstCell.width / 2) - boardRect.left;
+          const y1 = (firstCell.top + firstCell.height / 2) - boardRect.top;
+          const x2 = (lastCell.left + lastCell.width / 2) - boardRect.left;
+          const y2 = (lastCell.top + lastCell.height / 2) - boardRect.top;
+
+          strikeLine.setAttribute("x1", x1);
+          strikeLine.setAttribute("y1", y1);
+          strikeLine.setAttribute("x2", x2);
+          strikeLine.setAttribute("y2", y2);
+          
+          const color = oTurn ? "var(--o-color)" : "var(--x-color)";
+          strikeLine.setAttribute("stroke", color);
+
+          // Animation logic
+          const length = Math.sqrt(Math.pow(x2 - x1, 2) + Math.pow(y2 - y1, 2));
+          strikeLine.style.strokeDasharray = length;
+          strikeLine.style.strokeDashoffset = length;
+          
+          lineSvg.style.display = "block";
+          
+          // Trigger reflow to start animation
+          strikeLine.getBoundingClientRect();
+          strikeLine.style.strokeDashoffset = "0";
+        }
+
+        function computerMove() {
+          if (isGameOver) return;
+          const availableCells = [...cells].filter(cell => !cell.classList.contains(X_CLASS) && !cell.classList.contains(O_CLASS));
           if (availableCells.length > 0) {
             const bestCell = getBestMove(availableCells);
             bestCell.click();
@@ -373,69 +411,56 @@
           const blockCell = findWinningMove(X_CLASS, availableCells);
           if (blockCell) return blockCell;
           const centerCell = availableCells.find(c => c.dataset.cellIndex === "4");
-          if (centerCell) return centerCell;
-          return availableCells[Math.floor(Math.random() * availableCells.length)];
+          return centerCell || availableCells[Math.floor(Math.random() * availableCells.length)];
         }
 
         function findWinningMove(playerClass, availableCells) {
           return availableCells.find((cell) => {
             cell.classList.add(playerClass);
-            const canWin = checkWin(playerClass);
+            const canWin = !!getWinningCombination(playerClass);
             cell.classList.remove(playerClass);
             return canWin;
           });
         }
 
-        function placeMark(cell, currentClass) { cell.classList.add(currentClass); }
+        function placeMark(cell, currentClass) { cell.classList.add(currentClass); playAudio(clickSound); }
         function swapTurns() { oTurn = !oTurn; }
 
         function updateTurnIndicator() {
-          turnIndicator.textContent = oTurn ? 
-            (singlePlayerMode ? "Computer's Turn" : "Player O's Turn") : "Player X's Turn";
+          turnIndicator.textContent = oTurn ? (singlePlayerMode ? "Computer's Turn" : "Player O's Turn") : "Player X's Turn";
           turnIndicator.className = oTurn ? "player-turn player-o" : "player-turn player-x";
         }
 
-        function checkWin(currentClass) {
-          return WINNING_COMBINATIONS.some(comb => 
-            comb.every(index => cells[index].classList.contains(currentClass))
-          );
-        }
-
-        function isDraw() {
-          return [...cells].every(cell => cell.classList.contains(X_CLASS) || cell.classList.contains(O_CLASS));
-        }
+        function isDraw() { return [...cells].every(cell => cell.classList.contains(X_CLASS) || cell.classList.contains(O_CLASS)); }
 
         function endGame(draw) {
-          if (draw) {
-            winText.textContent = "Game Drawn!";
-            winMessage.textContent = "It was a cosmic standoff!";
-            scores.tie++;
-            document.getElementById("score-tie").textContent = scores.tie;
-          } else {
-            const winner = oTurn ? "O" : "X";
-            winText.textContent = `Player ${winner} Wins!`;
-            winMessage.textContent = `The stars have aligned for Player ${winner}!`;
-            scores[winner.toLowerCase()]++;
-            document.getElementById(`score-${winner.toLowerCase()}`).textContent = scores[winner.toLowerCase()];
-            playAudio(winSound);
-            createConfetti();
-          }
-          winModal.style.display = "flex";
+          isGameOver = true;
+          setTimeout(() => {
+            if (draw) {
+              winText.textContent = "Game Drawn!";
+              winMessage.textContent = "It was a cosmic standoff!";
+              scores.tie++;
+              document.getElementById("score-tie").textContent = scores.tie;
+            } else {
+              const winner = oTurn ? "O" : "X";
+              winText.textContent = `Player ${winner} Wins!`;
+              winMessage.textContent = `The stars have aligned!`;
+              scores[winner.toLowerCase()]++;
+              document.getElementById(`score-${winner.toLowerCase()}`).textContent = scores[winner.toLowerCase()];
+              playAudio(winSound);
+              createConfetti();
+            }
+            winModal.style.display = "flex";
+          }, 600);
         }
 
-        function playAudio(soundElement) {
-          if (!soundElement) return;
-          soundElement.currentTime = 0;
-          soundElement.play().catch(() => {});
-        }
+        function playAudio(soundElement) { if (soundElement) { soundElement.currentTime = 0; soundElement.play().catch(() => {}); } }
 
         document.getElementById("restart-btn").addEventListener("click", startGame);
         document.getElementById("play-again-btn").addEventListener("click", startGame);
         document.getElementById("reset-score-btn").addEventListener("click", () => {
           scores = { x: 0, o: 0, tie: 0 };
-          document.getElementById("score-x").textContent = "0";
-          document.getElementById("score-o").textContent = "0";
-          document.getElementById("score-tie").textContent = "0";
+          document.querySelectorAll(".score-value").forEach(el => el.textContent = "0");
         });
 
         function createStars() {
@@ -453,12 +478,12 @@
         }
 
         function createConfetti() {
-          for (let i = 0; i < 100; i++) {
+          for (let i = 0; i < 80; i++) {
             const confetti = document.createElement("div");
             confetti.className = "confetti";
             confetti.style.left = `${Math.random() * 100}vw`;
             confetti.style.backgroundColor = ["#ff6fbf", "#ffd54f", "#ffb3d9", "#ffe066", "#ff4d94"][Math.floor(Math.random() * 5)];
-            confetti.style.animationDuration = `${3 + Math.random() * 4}s`;
+            confetti.style.animationDuration = `${3 + Math.random() * 2}s`;
             document.body.appendChild(confetti);
             setTimeout(() => confetti.remove(), 5000);
           }
