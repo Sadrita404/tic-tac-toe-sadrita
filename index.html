@@ -6,19 +6,18 @@
     <title>Cosmic Tic-Tac-Toe</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <style>
-      /* Existing styles remain unchanged */
       :root {
-        --primary: #6c5ce7;
-        --secondary: #a29bfe;
-        --dark: #2d3436;
-        --light: #f5f6fa;
-        --x-color: #e17055;
-        --o-color: #00b894;
+        --primary: #ff6fbf;
+        --secondary: #d9a825;
+        --dark: #3b1f3d;
+        --light: #fff9f2;
+        --x-color: #ff4d94;
+        --o-color: #e3b800;
       }
 
       body {
         font-family: "Poppins", sans-serif;
-        background: linear-gradient(135deg, #f5f7fa 0%, #c3cfe2 100%);
+        background: linear-gradient(135deg, #fff8fb 0%, #fffdf3 100%);
         min-height: 100vh;
         display: flex;
         flex-direction: column;
@@ -36,19 +35,17 @@
         position: relative;
         cursor: pointer;
         transition: all 0.3s ease;
-        background: white;
+        background: #ffe2d8;
         border-radius: 12px;
-        box-shadow: 0 10px 20px rgba(0, 0, 0, 0.1);
+        box-shadow: 0 10px 20px rgba(167, 86, 122, 0.18);
       }
 
       .cell:hover {
         transform: translateY(-5px);
-        box-shadow: 0 15px 30px rgba(0, 0, 0, 0.15);
+        box-shadow: 0 15px 30px rgba(167, 86, 122, 0.22);
       }
 
-      .cell.x::before,
-      .cell.x::after,
-      .cell.o::before {
+      .cell.x::before, .cell.x::after, .cell.o::before {
         position: absolute;
         content: "";
         background-color: var(--x-color);
@@ -57,13 +54,8 @@
         border-radius: 10px;
       }
 
-      .cell.x::before {
-        transform: rotate(45deg);
-      }
-
-      .cell.x::after {
-        transform: rotate(-45deg);
-      }
+      .cell.x::before { transform: rotate(45deg); }
+      .cell.x::after { transform: rotate(-45deg); }
 
       .cell.o::before {
         width: 60px;
@@ -79,38 +71,30 @@
         grid-gap: 15px;
         width: 300px;
         height: 300px;
-        margin: 30px auto;
+        margin: 20px auto;
       }
 
       .confetti {
         position: fixed;
         width: 10px;
         height: 10px;
-        background-color: var(--primary);
+        background-color: var(--secondary);
         opacity: 0;
         animation: confetti-fall 5s ease-out forwards;
         z-index: 1000;
       }
 
       @keyframes confetti-fall {
-        0% {
-          transform: translateY(-100vh) rotate(0deg);
-          opacity: 1;
-        }
-        100% {
-          transform: translateY(100vh) rotate(360deg);
-          opacity: 0;
-        }
+        0% { transform: translateY(-100vh) rotate(0deg); opacity: 1; }
+        100% { transform: translateY(100vh) rotate(360deg); opacity: 0; }
       }
 
       .modal {
         display: none;
         position: fixed;
-        top: 0;
-        left: 0;
-        width: 100%;
-        height: 100%;
-        background-color: rgba(0, 0, 0, 0.7);
+        top: 0; left: 0;
+        width: 100%; height: 100%;
+        background-color: rgba(59, 24, 57, 0.7);
         z-index: 100;
         justify-content: center;
         align-items: center;
@@ -123,19 +107,7 @@
         text-align: center;
         max-width: 400px;
         width: 90%;
-        box-shadow: 0 20px 40px rgba(0, 0, 0, 0.3);
-        animation: modal-appear 0.4s ease-out;
-      }
-
-      @keyframes modal-appear {
-        from {
-          opacity: 0;
-          transform: translateY(-50px);
-        }
-        to {
-          opacity: 1;
-          transform: translateY(0);
-        }
+        box-shadow: 0 20px 40px rgba(59, 24, 57, 0.15);
       }
 
       .player-turn {
@@ -145,184 +117,131 @@
         border-radius: 50px;
         font-weight: bold;
         color: white;
-        box-shadow: 0 5px 15px rgba(0, 0, 0, 0.1);
+        box-shadow: 0 5px 15px rgba(59, 24, 57, 0.12);
         transition: all 0.3s ease;
         margin-bottom: 20px;
       }
 
-      .player-x {
-        background-color: var(--x-color);
-      }
-
-      .player-o {
-        background-color: var(--o-color);
-      }
+      .player-x { background-color: var(--x-color); }
+      .player-o { background-color: var(--o-color); }
 
       .btn {
-        padding: 12px 25px;
+        padding: 10px 20px;
         border: none;
         border-radius: 50px;
         font-weight: 600;
         cursor: pointer;
         transition: all 0.3s ease;
-        margin: 10px 5px;
-        box-shadow: 0 5px 15px rgba(0, 0, 0, 0.1);
+        margin: 5px;
         color: white;
       }
 
-      .btn-primary {
-        background-color: var(--primary);
-      }
-
-      .btn-primary:hover {
-        background-color: #5649c9;
-        transform: translateY(-2px);
-        box-shadow: 0 8px 20px rgba(0, 0, 0, 0.15);
+      .btn-primary { background-color: var(--primary); }
+      .btn-primary:hover { background-color: #ff4a97; transform: translateY(-2px); }
+      
+      .btn-sm {
+        padding: 6px 15px;
+        font-size: 12px;
+        background-color: #5f3d52;
       }
 
       .btn-selected {
-        background-color: #4a3cbe; /* Darker shade for selected button */
+        background-color: #3b1f3d !important;
+        box-shadow: inset 0 2px 4px rgba(0,0,0,0.3);
+        border: 2px solid var(--primary);
       }
 
       .scoreboard {
-        background: white;
+        background: rgba(255, 255, 255, 0.78);
         border-radius: 15px;
         padding: 15px;
-        margin-bottom: 20px;
+        margin-bottom: 15px;
         display: flex;
         justify-content: space-between;
-        box-shadow: 0 10px 20px rgba(0, 0, 0, 0.1);
         width: 300px;
       }
 
-      .score-item {
-        text-align: center;
-        padding: 10px 20px;
-        border-radius: 10px;
-        flex: 1;
-        margin: 0 5px;
-      }
-
-      .score-x {
-        background-color: rgba(225, 112, 85, 0.1);
-        color: var(--x-color);
-      }
-
-      .score-o {
-        background-color: rgba(0, 184, 148, 0.1);
-        color: var(--o-color);
-      }
-
-      .score-tie {
-        background-color: rgba(108, 92, 231, 0.1);
-        color: var(--primary);
-      }
-
-      .score-value {
-        font-size: 24px;
-        font-weight: bold;
-      }
-
-      .score-label {
-        font-size: 14px;
-        margin-top: 5px;
-      }
-
-      .header-image {
-        width: 150px;
-        height: 150px;
-        margin: 0 auto 20px;
-        display: block;
-      }
+      .score-item { text-align: center; flex: 1; }
+      .score-value { font-size: 24px; font-weight: bold; }
+      .score-label { font-size: 12px; }
 
       .stars {
         position: fixed;
-        top: 0;
-        left: 0;
-        width: 100%;
-        height: 100%;
+        top: 0; left: 0;
+        width: 100%; height: 100%;
         pointer-events: none;
         z-index: -1;
       }
 
       .star {
         position: absolute;
-        width: 2px;
-        height: 2px;
         background: white;
         border-radius: 50%;
         animation: twinkle 2s infinite alternate;
       }
 
-      @keyframes twinkle {
-        0% {
-          opacity: 0.2;
-        }
-        100% {
-          opacity: 1;
-        }
-      }
+      @keyframes twinkle { 0% { opacity: 0.2; } 100% { opacity: 1; } }
 
-      .footer {
-        margin-top: 30px;
-        text-align: center;
+      .option-label {
+        font-size: 12px;
+        text-transform: uppercase;
+        letter-spacing: 1px;
+        font-weight: bold;
         color: var(--dark);
-        opacity: 0.7;
-        font-size: 14px;
+        margin-bottom: 5px;
       }
     </style>
   </head>
   <body>
     <div class="stars" id="stars"></div>
 
-    <div class="text-center text-gray-800 text-lg mb-2">
-      Developed by Sadrita Neogi
-    </div>
-
-    <h1 class="text-3xl font-bold text-center mb-2 text-indigo-800">
-      Cosmic Tic-Tac-Toe
-    </h1>
-    <p class="text-center text-gray-600 mb-6">
-      The ultimate interstellar battle of wits!
-    </p>
-
-    <div class="flex justify-center mb-4">
-      <button class="btn btn-primary" id="mode-multiplayer">Multiplayer</button>
-      <button class="btn btn-primary" id="mode-singleplayer">
-        Single Player
-      </button>
+    <h1 class="text-3xl font-bold text-center mb-2 mt-4 text-indigo-800">Cosmic Tic-Tac-Toe</h1>
+    
+    <div class="flex flex-col items-center gap-2 mb-4">
+      <div>
+        <p class="option-label text-center">Game Mode</p>
+        <button class="btn btn-primary btn-selected" id="mode-multiplayer">Multiplayer</button>
+        <button class="btn btn-primary" id="mode-singleplayer">Single Player</button>
+      </div>
+      <div>
+        <p class="option-label text-center">Who starts first?</p>
+        <button class="btn btn-primary btn-selected" id="start-x">X Starts</button>
+        <button class="btn btn-primary" id="start-o">O Starts</button>
+      </div>
     </div>
 
     <div class="scoreboard">
-      <div class="score-item score-x">
+      <div class="score-item text-pink-600">
         <div class="score-value" id="score-x">0</div>
         <div class="score-label">Player X</div>
       </div>
-      <div class="score-item score-tie">
+      <div class="score-item text-gray-500">
         <div class="score-value" id="score-tie">0</div>
         <div class="score-label">Ties</div>
       </div>
-      <div class="score-item score-o">
+      <div class="score-item text-yellow-600">
         <div class="score-value" id="score-o">0</div>
         <div class="score-label">Player O</div>
       </div>
     </div>
+    
+    <button class="btn btn-sm mb-4" id="reset-score-btn">Reset Scoreboard</button>
 
     <div class="player-turn player-x" id="turn-indicator">Player X's Turn</div>
 
     <div class="board" id="board">
-      <div class="cell" data-cell></div>
-      <div class="cell" data-cell></div>
-      <div class="cell" data-cell></div>
-      <div class="cell" data-cell></div>
-      <div class="cell" data-cell></div>
-      <div class="cell" data-cell></div>
-      <div class="cell" data-cell></div>
-      <div class="cell" data-cell></div>
-      <div class="cell" data-cell></div>
+      <div class="cell" data-cell-index="0" data-cell></div>
+      <div class="cell" data-cell-index="1" data-cell></div>
+      <div class="cell" data-cell-index="2" data-cell></div>
+      <div class="cell" data-cell-index="3" data-cell></div>
+      <div class="cell" data-cell-index="4" data-cell></div>
+      <div class="cell" data-cell-index="5" data-cell></div>
+      <div class="cell" data-cell-index="6" data-cell></div>
+      <div class="cell" data-cell-index="7" data-cell></div>
+      <div class="cell" data-cell-index="8" data-cell></div>
     </div>
 
-    <div class="flex justify-center mt-6">
+    <div class="flex justify-center mt-4">
       <button class="btn btn-primary" id="restart-btn">New Game</button>
     </div>
 
@@ -331,107 +250,98 @@
         <h2 class="text-2xl font-bold mb-4" id="win-text">Player X Wins!</h2>
         <p class="mb-6 text-gray-700" id="win-message"></p>
         <button class="btn btn-primary" id="play-again-btn">Play Again</button>
-        <button class="btn btn-primary" id="close-modal-btn">Close</button>
       </div>
     </div>
 
-    <div class="footer">Developed by Sadrita Neogi</div>
+    <div class="footer pb-4">Developed by Sadrita Neogi</div>
+    
     <audio id="win-sound" src="fahhh_KcgAXfs.mp3" preload="auto"></audio>
-    <audio
-      id="click-sound"
-      src="universfield-computer-mouse-click-352734.mp3"
-      preload="auto"></audio>
+    <audio id="click-sound" src="universfield-computer-mouse-click-352734.mp3" preload="auto"></audio>
 
     <script>
       document.addEventListener("DOMContentLoaded", () => {
-        // Create stars for background
         createStars();
 
-        const board = document.getElementById("board");
         const cells = document.querySelectorAll("[data-cell]");
         const winModal = document.getElementById("win-modal");
         const winText = document.getElementById("win-text");
         const winMessage = document.getElementById("win-message");
         const winSound = document.getElementById("win-sound");
-        const restartBtn = document.getElementById("restart-btn");
-        const playAgainBtn = document.getElementById("play-again-btn");
-        const closeModalBtn = document.getElementById("close-modal-btn");
-        const turnIndicator = document.getElementById("turn-indicator");
-        const scoreX = document.getElementById("score-x");
-        const scoreO = document.getElementById("score-o");
-        const scoreTie = document.getElementById("score-tie");
-        const modeMultiplayerBtn = document.getElementById("mode-multiplayer");
-        const modeSingleplayerBtn =
-          document.getElementById("mode-singleplayer");
         const clickSound = document.getElementById("click-sound");
+        const turnIndicator = document.getElementById("turn-indicator");
+        
+        const modeMultiplayerBtn = document.getElementById("mode-multiplayer");
+        const modeSingleplayerBtn = document.getElementById("mode-singleplayer");
+        const startXBtn = document.getElementById("start-x");
+        const startOBtn = document.getElementById("start-o");
 
         const X_CLASS = "x";
         const O_CLASS = "o";
         const WINNING_COMBINATIONS = [
-          [0, 1, 2],
-          [3, 4, 5],
-          [6, 7, 8],
-          [0, 3, 6],
-          [1, 4, 7],
-          [2, 5, 8],
-          [0, 4, 8],
-          [2, 4, 6],
+          [0, 1, 2], [3, 4, 5], [6, 7, 8],
+          [0, 3, 6], [1, 4, 7], [2, 5, 8],
+          [0, 4, 8], [2, 4, 6],
         ];
 
         let oTurn;
         let singlePlayerMode = false;
-        let scores = {
-          x: 0,
-          o: 0,
-          tie: 0,
-        };
+        let startingPlayer = "X"; // Default starting player
+        let scores = { x: 0, o: 0, tie: 0 };
 
         startGame();
 
-        restartBtn.addEventListener("click", startGame);
-        playAgainBtn.addEventListener("click", startGame);
-        closeModalBtn.addEventListener("click", () => {
-          winModal.style.display = "none";
-        });
+        // Mode and Starting Option Listeners
         modeMultiplayerBtn.addEventListener("click", () => {
           singlePlayerMode = false;
+          toggleActive(modeMultiplayerBtn, modeSingleplayerBtn);
           startGame();
-          setButtonSelected(modeMultiplayerBtn);
         });
+
         modeSingleplayerBtn.addEventListener("click", () => {
           singlePlayerMode = true;
+          toggleActive(modeSingleplayerBtn, modeMultiplayerBtn);
           startGame();
-          setButtonSelected(modeSingleplayerBtn);
         });
 
-        function setButtonSelected(selectedButton) {
-          // Remove selected class from both buttons
-          modeMultiplayerBtn.classList.remove("btn-selected");
-          modeSingleplayerBtn.classList.remove("btn-selected");
+        startXBtn.addEventListener("click", () => {
+          startingPlayer = "X";
+          toggleActive(startXBtn, startOBtn);
+          startGame();
+        });
 
-          // Add selected class to the clicked button
-          selectedButton.classList.add("btn-selected");
+        startOBtn.addEventListener("click", () => {
+          startingPlayer = "O";
+          toggleActive(startOBtn, startXBtn);
+          startGame();
+        });
+
+        function toggleActive(active, inactive) {
+          active.classList.add("btn-selected");
+          inactive.classList.remove("btn-selected");
         }
 
         function startGame() {
-          oTurn = false;
+          // Initialize turn based on selection
+          oTurn = (startingPlayer === "O");
+          
           updateTurnIndicator();
-
           cells.forEach((cell) => {
-            cell.classList.remove(X_CLASS);
-            cell.classList.remove(O_CLASS);
+            cell.classList.remove(X_CLASS, O_CLASS);
             cell.removeEventListener("click", handleClick);
             cell.addEventListener("click", handleClick, { once: true });
           });
-
           winModal.style.display = "none";
-          playStartSound();
+          playAudio(clickSound);
+
+          // If single player and computer starts (O)
+          if (singlePlayerMode && oTurn) {
+            setTimeout(computerMove, 600);
+          }
         }
 
         function handleClick(e) {
           const cell = e.target;
           const currentClass = oTurn ? O_CLASS : X_CLASS;
-
           placeMark(cell, currentClass);
 
           if (checkWin(currentClass)) {
@@ -439,106 +349,60 @@
           } else if (isDraw()) {
             endGame(true);
           } else {
-            if (singlePlayerMode && !oTurn) {
-              // If in single player mode and it's X's turn, let the computer play
-              swapTurns();
-              updateTurnIndicator();
-              setTimeout(computerMove, 1000); // Delay of 1 second
-            } else {
-              swapTurns();
-              updateTurnIndicator();
+            swapTurns();
+            updateTurnIndicator();
+            if (singlePlayerMode && oTurn) {
+              setTimeout(computerMove, 400);
             }
           }
         }
 
         function computerMove() {
-          const availableCells = [...cells].filter((cell) => {
-            return (
-              !cell.classList.contains(X_CLASS) &&
-              !cell.classList.contains(O_CLASS)
-            );
-          });
-
+          const availableCells = [...cells].filter(cell => 
+            !cell.classList.contains(X_CLASS) && !cell.classList.contains(O_CLASS)
+          );
           if (availableCells.length > 0) {
-            const randomCell =
-              availableCells[Math.floor(Math.random() * availableCells.length)];
-            placeMark(randomCell, O_CLASS);
-
-            if (checkWin(O_CLASS)) {
-              endGame(false);
-            } else if (isDraw()) {
-              endGame(true);
-            } else {
-              swapTurns();
-              updateTurnIndicator();
-            }
+            const bestCell = getBestMove(availableCells);
+            bestCell.click();
           }
         }
 
-        function placeMark(cell, currentClass) {
-          cell.classList.add(currentClass);
+        function getBestMove(availableCells) {
+          const winCell = findWinningMove(O_CLASS, availableCells);
+          if (winCell) return winCell;
+          const blockCell = findWinningMove(X_CLASS, availableCells);
+          if (blockCell) return blockCell;
+          const centerCell = availableCells.find(c => c.dataset.cellIndex === "4");
+          if (centerCell) return centerCell;
+          return availableCells[Math.floor(Math.random() * availableCells.length)];
         }
 
-        function swapTurns() {
-          oTurn = !oTurn;
+        function findWinningMove(playerClass, availableCells) {
+          return availableCells.find((cell) => {
+            cell.classList.add(playerClass);
+            const canWin = checkWin(playerClass);
+            cell.classList.remove(playerClass);
+            return canWin;
+          });
         }
+
+        function placeMark(cell, currentClass) { cell.classList.add(currentClass); }
+        function swapTurns() { oTurn = !oTurn; }
 
         function updateTurnIndicator() {
-          if (oTurn) {
-            turnIndicator.textContent = singlePlayerMode
-              ? "Computer's Turn"
-              : "Player O's Turn";
-            turnIndicator.className = "player-turn player-o";
-          } else {
-            turnIndicator.textContent = "Player X's Turn";
-            turnIndicator.className = "player-turn player-x";
-          }
+          turnIndicator.textContent = oTurn ? 
+            (singlePlayerMode ? "Computer's Turn" : "Player O's Turn") : "Player X's Turn";
+          turnIndicator.className = oTurn ? "player-turn player-o" : "player-turn player-x";
         }
 
         function checkWin(currentClass) {
-          return WINNING_COMBINATIONS.some((combination) => {
-            return combination.every((index) => {
-              return cells[index].classList.contains(currentClass);
-            });
-          });
+          return WINNING_COMBINATIONS.some(comb => 
+            comb.every(index => cells[index].classList.contains(currentClass))
+          );
         }
 
         function isDraw() {
-          return [...cells].every((cell) => {
-            return (
-              cell.classList.contains(X_CLASS) ||
-              cell.classList.contains(O_CLASS)
-            );
-          });
-        }
-
-        function playAudio(soundElement) {
-          if (!soundElement) {
-            return;
-          }
-
-          try {
-            soundElement.pause();
-            soundElement.currentTime = 0;
-            soundElement.volume = 1;
-
-            const playPromise = soundElement.play();
-            if (playPromise !== undefined) {
-              playPromise.catch((err) => {
-                console.warn("Sound play failed:", err);
-              });
-            }
-          } catch (err) {
-            console.warn("Sound error:", err);
-          }
-        }
-
-        function playWinSound() {
-          playAudio(winSound);
-        }
-
-        function playStartSound() {
-          playAudio(clickSound);
+          return [...cells].every(cell => cell.classList.contains(X_CLASS) || cell.classList.contains(O_CLASS));
         }
 
         function endGame(draw) {
@@ -546,32 +410,37 @@
             winText.textContent = "Game Drawn!";
             winMessage.textContent = "It was a cosmic standoff!";
             scores.tie++;
-            scoreTie.textContent = scores.tie;
+            document.getElementById("score-tie").textContent = scores.tie;
           } else {
             const winner = oTurn ? "O" : "X";
             winText.textContent = `Player ${winner} Wins!`;
             winMessage.textContent = `The stars have aligned for Player ${winner}!`;
-
-            if (winner === "X") {
-              scores.x++;
-              scoreX.textContent = scores.x;
-            } else {
-              scores.o++;
-              scoreO.textContent = scores.o;
-            }
-
-            playWinSound();
+            scores[winner.toLowerCase()]++;
+            document.getElementById(`score-${winner.toLowerCase()}`).textContent = scores[winner.toLowerCase()];
+            playAudio(winSound);
             createConfetti();
           }
-
           winModal.style.display = "flex";
         }
 
+        function playAudio(soundElement) {
+          if (!soundElement) return;
+          soundElement.currentTime = 0;
+          soundElement.play().catch(() => {});
+        }
+
+        document.getElementById("restart-btn").addEventListener("click", startGame);
+        document.getElementById("play-again-btn").addEventListener("click", startGame);
+        document.getElementById("reset-score-btn").addEventListener("click", () => {
+          scores = { x: 0, o: 0, tie: 0 };
+          document.getElementById("score-x").textContent = "0";
+          document.getElementById("score-o").textContent = "0";
+          document.getElementById("score-tie").textContent = "0";
+        });
+
         function createStars() {
           const starsContainer = document.getElementById("stars");
-          const starsCount = 100;
-
-          for (let i = 0; i < starsCount; i++) {
+          for (let i = 0; i < 100; i++) {
             const star = document.createElement("div");
             star.className = "star";
             star.style.left = `${Math.random() * 100}%`;
@@ -584,34 +453,15 @@
         }
 
         function createConfetti() {
-          const confettiCount = 100;
-
-          for (let i = 0; i < confettiCount; i++) {
+          for (let i = 0; i < 100; i++) {
             const confetti = document.createElement("div");
             confetti.className = "confetti";
             confetti.style.left = `${Math.random() * 100}vw`;
-            confetti.style.width = `${5 + Math.random() * 10}px`;
-            confetti.style.height = `${5 + Math.random() * 10}px`;
-            confetti.style.backgroundColor = getRandomColor();
+            confetti.style.backgroundColor = ["#ff6fbf", "#ffd54f", "#ffb3d9", "#ffe066", "#ff4d94"][Math.floor(Math.random() * 5)];
             confetti.style.animationDuration = `${3 + Math.random() * 4}s`;
             document.body.appendChild(confetti);
-
-            setTimeout(() => {
-              confetti.remove();
-            }, 5000);
+            setTimeout(() => confetti.remove(), 5000);
           }
-        }
-
-        function getRandomColor() {
-          const colors = [
-            "#6c5ce7",
-            "#a29bfe",
-            "#00b894",
-            "#e17055",
-            "#fdcb6e",
-            "#fd79a8",
-          ];
-          return colors[Math.floor(Math.random() * colors.length)];
         }
       });
     </script>
